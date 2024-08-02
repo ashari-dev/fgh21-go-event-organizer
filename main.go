@@ -80,7 +80,13 @@ func main() {
 				cont = false
 			}
 		}
-		if err != nil{
+		
+		if err != nil {
+			c.JSON(http.StatusBadRequest, Respont{
+				Success: false,
+				Message: "name and username not requitment",
+			})
+		}else{
 			if cont {
 				data = append(data, user)
 				c.JSON(http.StatusOK, Respont{
@@ -91,10 +97,12 @@ func main() {
 			}else{
 				c.JSON(http.StatusUnauthorized, Respont{
 					Success: false,
-					Message: "Email hes",
+					Message: "Email already exist",
 				})
 			}
 		}
+
+		
 	})
 
 	r.PATCH("/users/:id", func(c *gin.Context) {
@@ -108,23 +116,29 @@ func main() {
 				idx = index
 			}
 		}
-
-		if cons {
-			dataEdit := User{}
-			c.Bind(&dataEdit)
-			data[idx].Name = dataEdit.Name
-			data[idx].Email = dataEdit.Email
-			data[idx].Password = dataEdit.Password
-			c.JSON(http.StatusOK,Respont{
-				Success: true,
-				Message: "data is update",
-				Results: data[idx],
+		dataEdit := User{}
+		err := c.Bind(&dataEdit)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, Respont{
+				Success: false,
+				Message: "name and username not requitment",
 			})
 		}else{
-			c.JSON(http.StatusNotFound, Respont{
-				Success: false,
-				Message: "Id is not found",
-			})
+			if cons {
+				data[idx].Name = dataEdit.Name
+				data[idx].Email = dataEdit.Email
+				data[idx].Password = dataEdit.Password
+				c.JSON(http.StatusOK,Respont{
+					Success: true,
+					Message: "data is update",
+					Results: data[idx],
+				})
+			}else{
+				c.JSON(http.StatusNotFound, Respont{
+					Success: false,
+					Message: "Id is not found",
+				})
+			}
 		}
 	})
 
