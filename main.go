@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -18,7 +19,7 @@ type User struct{
 	Id int `json:"id"`
 	Name string `json:"name" form:"name" binding:"required"`
 	Email string `json:"email" form:"email" binding:"required,email"`
-	Password string `json:"-" form:"password" binding:"required,min=8"`
+	Password string `json:"-" form:"password"`
 }
 
 func main() {
@@ -73,7 +74,13 @@ func main() {
 	r.POST("/users",func(c *gin.Context) {
 		user := User{}
 		err := c.Bind(&user)
-		user.Id = len(data)+1
+		result := 0
+		for _, v := range data {
+			result = v.Id
+		}
+		user.Id = result + 1
+
+
 		cont := true
 		for _, v := range data {
 			if v.Email == user.Email {
@@ -86,6 +93,7 @@ func main() {
 				Success: false,
 				Message: "name and username not requitment",
 			})
+			fmt.Println(err)
 		}else{
 			if cont {
 				data = append(data, user)
@@ -100,6 +108,8 @@ func main() {
 					Message: "Email already exist",
 				})
 			}
+			fmt.Println(err)
+
 		}
 
 		
