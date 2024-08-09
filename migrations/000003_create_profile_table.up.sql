@@ -9,3 +9,5 @@ CREATE TABLE "profile"(
     nationality_id int references nationalities(id),
     users_id int references users(id)
 ) 
+
+

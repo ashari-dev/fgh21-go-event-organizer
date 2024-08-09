@@ -32,5 +32,5 @@ migrate\:insert:
 	migrate create -ext sql -dir migrations -seq insert_$(table)_table
 
 
-go:
-	go run main.go
+run:
+	nodemon --exec go run main.go --signal SIGTERM
