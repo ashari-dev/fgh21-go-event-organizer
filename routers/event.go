@@ -10,6 +10,7 @@ import (
 func RoutersEvents(rg *gin.RouterGroup) {
 	rg.GET("", controllers.GetAllEvent)
 	rg.GET("/:id", controllers.GetOneEvent)
+	rg.GET("/category/:id", controllers.GetEventByCategory)
 	rg.GET("/section/:id", controllers.GetSectionEvent)
 	rg.POST("", middlewares.AuthMiddleware(), controllers.CreateEvent)
 	rg.GET("/my-events", middlewares.AuthMiddleware(), controllers.GetAllEventByCreated)

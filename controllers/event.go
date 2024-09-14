@@ -139,3 +139,15 @@ func DeleteEvent(c *gin.Context) {
 
 	lib.HandlerOK(c, "Delete data success", eventDel, nil)
 }
+
+func GetEventByCategory(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	events, err := repository.GetEventByCategory(id)
+	if err != nil {
+		fmt.Println(err)
+		lib.HandlerNotfound(c, "data not found")
+		return
+	}
+
+	lib.HandlerOK(c, "Get event by category", events, nil)
+}
