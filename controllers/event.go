@@ -144,10 +144,29 @@ func GetEventByCategory(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	events, err := repository.GetEventByCategory(id)
 	if err != nil {
-		fmt.Println(err)
 		lib.HandlerNotfound(c, "data not found")
 		return
 	}
 
 	lib.HandlerOK(c, "Get event by category", events, nil)
+}
+
+func CreateEventCategory(c *gin.Context) {
+	var data dtos.EventCategory
+	err := c.Bind(&data)
+	if err != nil {
+		lib.HandlerBadReq(c, "create request failed")
+		return
+	}
+
+	eventCategory, err := repository.CreateEventCategory(models.EventCategory{
+		EventId:    data.EventId,
+		CategoryId: data.CategoryId,
+	})
+	if err != nil {
+		lib.HandlerBadReq(c, "Create Failed")
+		return
+	}
+	lib.HandlerOK(c, "create event category successfully ", eventCategory, nil)
+
 }

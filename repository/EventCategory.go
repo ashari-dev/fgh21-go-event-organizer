@@ -28,3 +28,21 @@ func GetEventByCategory(id int) ([]models.Event, error) {
 
 	return events, nil
 }
+
+func CreateEventCategory(data models.EventCategory) (models.EventCategory, error) {
+	db := lib.DB()
+	defer db.Close(context.Background())
+
+	sql := `INSERT INTO event_categories (event_id, category_id) VALUES ($1, $2) RETURNING *`
+	rows, err := db.Query(context.Background(), sql, data.EventId, data.CategoryId)
+	if err != nil {
+		return models.EventCategory{}, err
+	}
+
+	eventCategory, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.EventCategory])
+	if err != nil {
+		return models.EventCategory{}, err
+	}
+
+	return eventCategory, nil
+}
