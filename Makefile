@@ -1,5 +1,5 @@
-host ?= 103.93.58.89
-port ?= 54326
+host ?= 3.25.204.209
+port ?= 5432
 user ?= postgres
 pass ?= 123
 db ?= find_your_event

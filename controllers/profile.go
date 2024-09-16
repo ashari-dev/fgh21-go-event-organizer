@@ -98,7 +98,7 @@ func UploadImageProfile(c *gin.Context) {
 		return
 	}
 
-	linkImg := "http://103.93.58.89:21216/img/profile/" + newFile
+	linkImg := "/img/profile/" + newFile
 
 	delImgBefore, _ := repository.GetProfileByUserId(userId)
 	if delImgBefore.Picture != nil {
