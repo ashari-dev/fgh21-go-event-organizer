@@ -2,7 +2,7 @@
 
 ## Description
 
-Proyek ini adalah backend service yang dibangun menggunakan Go (Golang). Tujuan dari proyek ini adalah untuk menyediakan API yang kuat dan scalable untuk aplikasi Event Ogranizer (FindYourEvent).
+This project is a backend service built using Go (Golang). The goal of this project is to provide a robust and scalable API for the Event Ogranizer (FindYourEvent) application.
 
 ## Features
 
