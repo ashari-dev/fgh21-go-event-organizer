@@ -20,6 +20,7 @@ func GetProfileByUserLogin(c *gin.Context) {
 
 	profile, err := repository.GetProfileByUserId(id)
 	if err != nil {
+		fmt.Println(err)
 		lib.HandlerNotfound(c, "Get profile fail")
 		return
 	}

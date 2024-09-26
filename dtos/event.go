@@ -12,3 +12,6 @@ type EventCategory struct {
 	EventId    int `form:"eventId"`
 	CategoryId int `form:"categoryId"`
 }
+type SearchEvents struct {
+	Search string `form:"search"`
+}

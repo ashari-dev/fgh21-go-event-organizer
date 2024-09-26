@@ -9,20 +9,38 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func GetAllEvent() ([]models.Event, error) {
+func GetAllEvent() ([]models.EventJoinLocation, error) {
 	db := lib.DB()
 	defer db.Close(context.Background())
 
-	sql := `SELECT * FROM events`
+	sql := `SELECT e.id, e.image, e.title, e."date", e.description, l.name as location, created_by FROM
+events e JOIN locations l ON e.location_id = l.id`
 	rows, err := db.Query(context.Background(), sql)
 	if err != nil {
-		return []models.Event{}, err
+		return []models.EventJoinLocation{}, err
 	}
-	events, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.Event])
+	events, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.EventJoinLocation])
 	if err != nil {
-		return []models.Event{}, err
+		return []models.EventJoinLocation{}, err
 	}
-	return events, err
+	return events, nil
+}
+func SearchEvents(search string) ([]models.EventJoinLocation, error) {
+	db := lib.DB()
+	defer db.Close(context.Background())
+	sql := `SELECT e.id, e.image, e.title, e."date", e.description, l.name as location, created_by FROM
+			events e JOIN locations l ON e.location_id = l.id WHERE e.title ILIKE '%'||$1||'%'`
+	rows, err := db.Query(context.Background(), sql, search)
+	if err != nil {
+		fmt.Println("ini")
+		return nil, err
+	}
+	events, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.EventJoinLocation])
+	if err != nil {
+		return nil, err
+	}
+
+	return events, nil
 }
 
 func GetAllEventByCreated(created int) ([]models.Event, error) {
@@ -41,19 +59,21 @@ func GetAllEventByCreated(created int) ([]models.Event, error) {
 	return events, err
 }
 
-func GetOneEvent(id int) (models.Event, error) {
+func GetOneEvent(id int) (models.EventJoinLocation, error) {
 	db := lib.DB()
 	defer db.Close(context.Background())
 
-	sql := `SELECT * FROM events WHERE id = $1`
+	sql := `SELECT e.id, e.image, e.title, e."date", e.description, l.name as location, created_by FROM
+		events e JOIN locations l ON e.location_id = l.id
+		WHERE e.id = $1;`
 	row, err := db.Query(context.Background(), sql, id)
 	if err != nil {
-		return models.Event{}, err
+		return models.EventJoinLocation{}, err
 	}
 
-	events, err := pgx.CollectOneRow(row, pgx.RowToStructByName[models.Event])
+	events, err := pgx.CollectOneRow(row, pgx.RowToStructByName[models.EventJoinLocation])
 	if err != nil {
-		return models.Event{}, err
+		return models.EventJoinLocation{}, err
 	}
 	return events, err
 }

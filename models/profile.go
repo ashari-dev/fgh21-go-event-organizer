@@ -23,4 +23,5 @@ type JoinUserProfile struct {
 	Profession  *string `json:"profession"`
 	Nationality *int    `json:"nationalityId" db:"nationality_id"`
 	BirthDate   *string `json:"birthDate" db:"birth_date"`
+	RoleId      *int    `json:"roleId" db:"role_id"`
 }

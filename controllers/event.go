@@ -14,12 +14,25 @@ import (
 func GetAllEvent(c *gin.Context) {
 	events, err := repository.GetAllEvent()
 	if err != nil {
-		lib.HandlerBadReq(c, "error")
+		fmt.Println(err)
+		lib.HandlerBadReq(c, "ini error")
+		return
+	}
+	lib.HandlerOK(c, "Get all event", events, nil)
+}
+
+func SearchEvents(c *gin.Context) {
+	search := c.Query("search")
+	events, err := repository.SearchEvents(search)
+	if err != nil {
+		fmt.Println(err)
+		lib.HandlerBadReq(c, "No events")
 		return
 	}
 
-	lib.HandlerOK(c, "Get all event", events, nil)
+	lib.HandlerOK(c, "Search events", events, nil)
 }
+
 func GetAllEventByCreated(c *gin.Context) {
 	created := c.GetInt("userId")
 	events, err := repository.GetAllEventByCreated(created)
@@ -36,7 +49,7 @@ func GetOneEvent(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	events, err := repository.GetOneEvent(id)
 	if err != nil {
-		lib.HandlerNotfound(c, "Event not found")
+		lib.HandlerNotfound(c, "Event not found as")
 		return
 	}
 

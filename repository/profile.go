@@ -34,9 +34,11 @@ func GetProfileByUserId(id int) (models.JoinUserProfile, error) {
 	defer db.Close(context.Background())
 
 	sql := `SELECT u.id,p.picture, p.full_name, u."username", u."email",
-			p.phone_number, p.gender, p.profession, p.nationality_id, p.birth_date 
-			FROM users u JOIN profile p ON u.id = p.users_id
-			WHERE u.id = $1`
+	p.phone_number, p.gender, p.profession, p.nationality_id, p.birth_date, r.id as role_id
+	FROM users u 
+	JOIN profile p ON u.id = p.users_id
+	JOIN roles r ON r.id = u.role_id
+	WHERE u.id = $1`
 
 	row, err := db.Query(context.Background(), sql, id)
 	if err != nil {
