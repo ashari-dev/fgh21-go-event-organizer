@@ -6,31 +6,55 @@ import (
 	"event-organizer/models"
 	"event-organizer/repository"
 	"fmt"
+	"math"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-func GetAllEvent(c *gin.Context) {
-	events, err := repository.GetAllEvent()
-	if err != nil {
-		fmt.Println(err)
-		lib.HandlerBadReq(c, "ini error")
-		return
-	}
-	lib.HandlerOK(c, "Get all event", events, nil)
-}
+// func GetAllEvent(c *gin.Context) {
+// 	events, err := repository.GetAllEvent()
+// 	if err != nil {
+// 		fmt.Println(err)
+// 		lib.HandlerBadReq(c, "ini error")
+// 		return
+// 	}
+// 	lib.HandlerOK(c, "Get all event", events, nil)
+// }
 
 func SearchEvents(c *gin.Context) {
 	search := c.Query("search")
-	events, err := repository.SearchEvents(search)
+	limit, _ := strconv.Atoi(c.Query("limit"))
+	page, _ := strconv.Atoi(c.Query("page"))
+
+	if limit <= 0 {
+		limit = 20
+	}
+	if page <= 0 {
+		page = 1
+	}
+
+	events, count, err := repository.SearchEvents(search, limit, page)
+	countTotalPage := math.Ceil(float64(count) / float64(limit))
+	prev := page - 1
+	next := page + 1
+	if next > int(countTotalPage) {
+		next = 0
+	}
 	if err != nil {
 		fmt.Println(err)
 		lib.HandlerBadReq(c, "No events")
 		return
 	}
 
-	lib.HandlerOK(c, "Search events", events, nil)
+	lib.HandlerOK(c, "Search events", events, dtos.PageInfo{
+		TotalData: count,
+		TotalPage: int(countTotalPage),
+		Page:      page,
+		Limit:     limit,
+		Next:      &next,
+		Prev:      &prev,
+	})
 }
 
 func GetAllEventByCreated(c *gin.Context) {

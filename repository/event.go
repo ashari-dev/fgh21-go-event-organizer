@@ -9,6 +9,19 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+func CountEvent(serch string) int {
+	db := lib.DB()
+	defer db.Close(context.Background())
+
+	sql := `SELECT COUNT(*) FROM events WHERE title ILIKE '%' || $1 || '%'`
+	row := db.QueryRow(context.Background(), sql, serch)
+
+	var count int
+	row.Scan(&count)
+
+	return count
+}
+
 func GetAllEvent() ([]models.EventJoinLocation, error) {
 	db := lib.DB()
 	defer db.Close(context.Background())
@@ -25,22 +38,34 @@ events e JOIN locations l ON e.location_id = l.id`
 	}
 	return events, nil
 }
-func SearchEvents(search string) ([]models.EventJoinLocation, error) {
+func SearchEvents(search string, limit int, page int) ([]models.EventJoinLocation, int, error) {
 	db := lib.DB()
 	defer db.Close(context.Background())
+	count := CountEvent(search)
+
+	defaultPage := 1
+	if page != 0 {
+		defaultPage = page
+	}
+
+	offset := (defaultPage - 1) * limit
+
 	sql := `SELECT e.id, e.image, e.title, e."date", e.description, l.name as location, created_by FROM
-			events e JOIN locations l ON e.location_id = l.id WHERE e.title ILIKE '%'||$1||'%'`
-	rows, err := db.Query(context.Background(), sql, search)
+	events e JOIN locations l ON e.location_id = l.id WHERE e.title
+	ILIKE '%'||$1||'%' 
+	ORDER BY e.id ASC 
+	LIMIT $2 OFFSET $3`
+
+	rows, err := db.Query(context.Background(), sql, search, limit, offset)
 	if err != nil {
-		fmt.Println("ini")
-		return nil, err
+		return nil, 0, err
 	}
 	events, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.EventJoinLocation])
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return events, nil
+	return events, count, nil
 }
 
 func GetAllEventByCreated(created int) ([]models.Event, error) {
