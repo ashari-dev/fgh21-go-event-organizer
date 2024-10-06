@@ -7,9 +7,13 @@ import (
 	"event-organizer/repository"
 	"fmt"
 	"math"
+	"net/http"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // func GetAllEvent(c *gin.Context) {
@@ -61,7 +65,6 @@ func GetAllEventByCreated(c *gin.Context) {
 	created := c.GetInt("userId")
 	events, err := repository.GetAllEventByCreated(created)
 	if err != nil {
-		fmt.Println(err)
 		lib.HandlerBadReq(c, "No events")
 		return
 	}
@@ -93,14 +96,46 @@ func GetSectionEvent(c *gin.Context) {
 
 func CreateEvent(c *gin.Context) {
 	createBy := c.GetInt("userId")
+	
+
+	maxFile := 500 * 1024
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, int64(maxFile))
+
+	file, err := c.FormFile("image")
 	var form dtos.FormEvent
-	err := c.Bind(&form)
+	location, _ := strconv.Atoi(c.PostForm("locationId"))
+	form.Title = c.PostForm("title")
+	form.Date = c.PostForm("date")
+	form.Description = c.PostForm("description")
+	form.LocationId = &location
 	if err != nil {
-		fmt.Println(err)
+		if err.Error() == "http: request body too large" {
+			lib.HandlerMaxFile(c, "file size too large, max capacity 500 kb")
+			return
+		}
+		lib.HandlerBadReq(c, "not file to upload")
+		return
 	}
 
+	allowExt := map[string]bool{".jpg": true, ".jpeg": true, ".png": true}
+	fileExt := strings.ToLower(filepath.Ext(file.Filename))
+	if !allowExt[fileExt] {
+		lib.HandlerBadReq(c, "extension file not validate")
+		return
+	}
+
+	newFile := uuid.New().String() + fileExt
+
+	dirUpload := "./img/events/"
+
+	if err := c.SaveUploadedFile(file, dirUpload+newFile); err != nil {
+		lib.HandlerBadReq(c, "file not upload")
+		return
+	}
+	images := "/img/events/" + newFile
+
 	event, err := repository.CreateEvent(models.Event{
-		Image:       form.Image,
+		Image:       images,
 		Title:       form.Title,
 		Date:        form.Date,
 		Description: form.Description,
@@ -108,7 +143,6 @@ func CreateEvent(c *gin.Context) {
 		CreatedBy:   &createBy,
 	})
 	if err != nil {
-		fmt.Println(err)
 		lib.HandlerBadReq(c, "Create Failed")
 		return
 	}
@@ -154,20 +188,12 @@ func UpdateEvent(c *gin.Context) {
 
 func DeleteEvent(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	createBy := c.GetInt("userId")
-
-	event, err := repository.GetOneEvent(id)
-
+	_, err := repository.DeleteEventCategory(id)
 	if err != nil {
+		fmt.Println(err)
 		lib.HandlerNotfound(c, "data not found")
 		return
 	}
-
-	if *event.CreatedBy != createBy {
-		lib.HandlerBadReq(c, "cannot delete other people's data")
-		return
-	}
-
 	eventDel, err := repository.DeleteEvent(id)
 	if err != nil {
 		lib.HandlerNotfound(c, "data not found")
@@ -180,6 +206,7 @@ func DeleteEvent(c *gin.Context) {
 func GetEventByCategory(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	events, err := repository.GetEventByCategory(id)
+	fmt.Println(events)
 	if err != nil {
 		lib.HandlerNotfound(c, "data not found")
 		return

@@ -12,9 +12,9 @@ func GetEventByCategory(id int) ([]models.Event, error) {
 	db := lib.DB()
 	defer db.Close(context.Background())
 
-	sql := `SELECT ec.id, e.image, e.title, e."date",e.description, e.location_id, e.created_by FROM categories c 
-			JOIN event_categories ec ON ec.event_id = c.id
-			JOIN events e ON ec.event_id = e.id
+	sql := `SELECT ec.id, e.image, e.title, e."date",e.description, e.location_id, e.created_by FROM events e 
+			JOIN event_categories ec ON ec.event_id = e.id
+			JOIN categories c ON c.id = ec.category_id
 			WHERE ec.category_id = $1`
 	rows, err := db.Query(context.Background(), sql, id)
 	if err != nil {
@@ -45,4 +45,21 @@ func CreateEventCategory(data models.EventCategory) (models.EventCategory, error
 	}
 
 	return eventCategory, nil
+}
+
+func DeleteEventCategory(EventId int) (models.EventCategory, error) {
+	db := lib.DB()
+	defer db.Close(context.Background())
+
+	sql := `DELETE FROM event_categories WHERE event_id = $1 RETURNING *`
+	row, err := db.Query(context.Background(), sql, EventId)
+	if err != nil {
+		return models.EventCategory{}, err
+	}
+
+	events, err := pgx.CollectOneRow(row, pgx.RowToStructByName[models.EventCategory])
+	if err != nil {
+		return models.EventCategory{}, err
+	}
+	return events, err
 }

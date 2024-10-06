@@ -10,7 +10,7 @@ import (
 func main() {
 	r := gin.Default()
 	r.Static("/img/profile", "./img/profile")
-	r.Static("/img/product", "./img/product")
+	r.Static("/img/events", "./img/events")
 
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true

@@ -9,9 +9,10 @@ type FormEvent struct {
 }
 
 type EventCategory struct {
-	EventId    int `form:"eventId"`
-	CategoryId int `form:"categoryId"`
+	EventId    int `form:"eventId" binding:"required"`
+	CategoryId int `form:"categoryId" binding:"required"`
 }
+
 type SearchEvents struct {
 	Search string `form:"search"`
 }
