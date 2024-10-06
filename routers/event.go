@@ -12,6 +12,7 @@ func RoutersEvents(rg *gin.RouterGroup) {
 	rg.GET("/:id", controllers.GetOneEvent)
 	rg.GET("/category/:id", controllers.GetEventByCategory)
 	rg.POST("/category", middlewares.AuthMiddleware(), controllers.CreateEventCategory)
+	rg.POST("/section", middlewares.AuthMiddleware(), controllers.CreateEventSection)
 	rg.GET("/section/:id", controllers.GetSectionEvent)
 	rg.POST("", middlewares.AuthMiddleware(), controllers.CreateEvent)
 	rg.GET("/my-events", middlewares.AuthMiddleware(), controllers.GetAllEventByCreated)

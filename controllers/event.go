@@ -96,7 +96,6 @@ func GetSectionEvent(c *gin.Context) {
 
 func CreateEvent(c *gin.Context) {
 	createBy := c.GetInt("userId")
-	
 
 	maxFile := 500 * 1024
 	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, int64(maxFile))
@@ -188,12 +187,8 @@ func UpdateEvent(c *gin.Context) {
 
 func DeleteEvent(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	_, err := repository.DeleteEventCategory(id)
-	if err != nil {
-		fmt.Println(err)
-		lib.HandlerNotfound(c, "data not found")
-		return
-	}
+	repository.DeleteEventCategory(id)
+	repository.DeleteSectionByEventId(id)
 	eventDel, err := repository.DeleteEvent(id)
 	if err != nil {
 		lib.HandlerNotfound(c, "data not found")
@@ -232,5 +227,26 @@ func CreateEventCategory(c *gin.Context) {
 		return
 	}
 	lib.HandlerOK(c, "create event category successfully ", eventCategory, nil)
+}
 
+func CreateEventSection(c *gin.Context) {
+	var data dtos.Sections
+
+	if err := c.Bind(&data); err != nil {
+		fmt.Println(err)
+		lib.HandlerBadReq(c, "create request failed")
+		return
+	}
+	fmt.Println(data)
+	eventCategory, err := repository.InsertSection(models.Section{
+		Name:     data.Name,
+		Price:    data.Price,
+		Quantity: data.Quantity,
+		EventId:  data.EventId,
+	})
+	if err != nil {
+		lib.HandlerBadReq(c, "Create Failed")
+		return
+	}
+	lib.HandlerOK(c, "create event category successfully ", eventCategory, nil)
 }
